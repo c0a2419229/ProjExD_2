@@ -13,7 +13,7 @@ DELTA = {  #移動量辞書
     pg.K_RIGHT: (+5, 0),
 }
 
-HOUKOU = {
+HOUKOU = {  #こうかとんの方向辞書
     (+5, 0): pg.transform.flip(pg.image.load("ex2/fig/3.png"), True, False),
     (+5, +5): pg.transform.flip(pg.image.load("ex2/fig/3.png"), True, False), 
     (+5, -5): pg.transform.flip(pg.image.load("ex2/fig/3.png"), True, False), 
@@ -84,16 +84,19 @@ def main():
             img = kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
             return img
         else:
-            img = HOUKOU[sum_mv]
-            if sum_mv == ((0, +5) or (0, -5)):
-                img = pg.transform.flip(img, True, False)
-            elif sum_mv == ((+5, 0), (+5, +5)):
-                img = pg.transform.flip(img, False, True)
-                img = pg.transform.flip(img, False, True)
-            return img
-        
-                    
+            if sum_mv[0] == +5:
+                img = HOUKOU[sum_mv]
+                if sum_mv[1] == -5:
+                    img = pg.transform.rotozoom(img, 45, 0.9)
+                elif sum_mv[1] == +5:
+                    img = pg.transform.rotozoom(img, 315, 0.9)
+                    img = pg.transform.flip(img, False, True)
+            elif sum_mv[0] == -5:
+                img = HOUKOU[sum_mv]
+                if sum_mv[1] == +5:
+                    img = pg.transform.flip(img, True, False)
 
+            return img
     
 
     #画面外判定関数
