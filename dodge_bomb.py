@@ -2,6 +2,7 @@ import os
 import sys
 import pygame as pg
 import random
+import time
 
 
 WIDTH, HEIGHT = 1100, 650
@@ -34,6 +35,38 @@ def main():
     bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)  
     vx, vy = +5, +5
     
+    
+    #爆弾の巨大化
+    def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+        bb_accs = [a for a in range(1, 11)]
+        bb_imgs = []
+        for r in range(1, 11):
+            bb_img = pg.Surface((20*r, 20*r))
+            pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
+            bb_img.set_colorkey((0, 0, 0))
+            bb_imgs.append(bb_img)
+        return bb_imgs, bb_accs
+    
+    
+    #ブラックアウト画面
+    def gameover(screen:pg.Surface) -> None:
+        #ブラックアウト
+        ba_img = pg.Surface((1100, 650))
+        pg.draw.rect(ba_img, (0, 0, 0), (0, 0, 1100, 650))
+        ba_img.set_alpha(200)
+        screen.blit(ba_img, [0, 0])
+        #泣きこうかとん
+        nk_img = pg.image.load(("fig/8.png"))
+        nk_img2 = pg.image.load(("fig/8.png"))
+        screen.blit(nk_img, [330, 280])
+        screen.blit(nk_img2, [710, 280])
+        #gameover表示
+        fonto = pg.font.Font(None, 80)
+        txt = fonto.render("Game Over", True, (255, 255, 255))
+        screen.blit(txt, [390, 290])
+        pg.display.update()
+        time.sleep(5)     
+    
 
     #画面外判定関数
     def check_bound(rct:pg.Rect) -> tuple[bool, bool]:
@@ -45,7 +78,7 @@ def main():
         x, y = True, True
         if rct.left < 0 or WIDTH < rct.right:
             x = False
-        if rct.top < 0 or HEIGHT < rct. bottom:
+        if rct.top < 0 or HEIGHT < rct.bottom:
             y = False
         return x, y
             
@@ -70,20 +103,29 @@ def main():
         screen.blit(kk_img, kk_rct)
 
         # 爆弾移動
-        bb_rct.move_ip(vx, vy)
-        if check_bound(bb_rct) != (True, True):  #爆弾画面外判定
-            if bb_rct.left < 0 or bb_rct.right > WIDTH:
-                vx *= -1
-            if bb_rct.top < 0 or bb_rct.bottom > HEIGHT:
-                vy *= -1
+        bb_imgs, bb_accs = init_bb_imgs()
+        avx = bb_accs[min(tmr//500, 9)]
+        avy = bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
+        yoko, tate = check_bound(bb_rct)  #爆弾画面外判定
+        print(yoko, tate)
+        
+        print(avx, avy)
+        if not yoko:
+            vx *= -1
+        if not tate:
+            vy *= -1
+        bb_rct.move_ip(vx*avx, vy*avy)
         screen.blit(bb_img, bb_rct)
 
         # ディスプレイ更新
-        pg.display.update()
         if kk_rct.colliderect(bb_rct):
+            gameover(screen)
             return
+        pg.display.update()
+        
         tmr += 1
-        clock.tick(100)
+        clock.tick(50)
         
 
 
