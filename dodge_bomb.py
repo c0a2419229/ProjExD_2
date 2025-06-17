@@ -27,11 +27,11 @@ def main():
     clock = pg.time.Clock()
     tmr = 0
     # 爆弾表示
-    bb_img = pg.Surface((20, 20))
-    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)
+    bb_img = pg.Surface((20, 20))  #空のSurface
+    pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  #赤い円
     bb_img.set_colorkey((0, 0, 0))
-    bb_rct = bb_img.get_rect()
-    bb_rct.center = random.randint(0, 1100), random.randint(0, 650)
+    bb_rct = bb_img.get_rect() 
+    bb_rct.center = random.randint(0, 1100), random.randint(0, 650)  
     vx = +5
     vy = +5
 
@@ -83,8 +83,10 @@ def main():
 
         # ディスプレイ更新
         pg.display.update()
+        if kk_rct.colliderect(bb_rct):
+            return
         tmr += 1
-        clock.tick(50)
+        clock.tick(100)
         
 
 
