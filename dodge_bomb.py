@@ -31,26 +31,23 @@ def main():
     pg.draw.circle(bb_img, (255, 0, 0), (10, 10), 10)  #赤い円
     bb_img.set_colorkey((0, 0, 0))
     bb_rct = bb_img.get_rect() 
-    bb_rct.center = random.randint(0, 1100), random.randint(0, 650)  
-    vx = +5
-    vy = +5
+    bb_rct.center = random.randint(0, WIDTH), random.randint(0, HEIGHT)  
+    vx, vy = +5, +5
+    
 
-    def check_bound(rct):
+    #画面外判定関数
+    def check_bound(rct:pg.Rect) -> tuple[bool, bool]:
         """
         引数：こうかとんRect or 爆弾Rect
         戻り値：横方向・縦方向の真理値タプル（True：画面内 / False：画面外）
         Rectオブジェクトのleft, right, top, bottomの値から画面内・外を判断する
         """
-        if rct.left <= 0:
-            return False
-        elif rct.right >= 1100:
-            return False
-        elif rct.top <= 0:
-            return False
-        elif rct.bottom >= 650:
-            return False
-        else:
-            return True
+        x, y = True, True
+        if rct.left < 0 or WIDTH < rct.right:
+            x = False
+        if rct.top < 0 or HEIGHT < rct. bottom:
+            y = False
+        return x, y
             
 
     while True:
@@ -68,16 +65,16 @@ def main():
                 sum_mv[1] += mv[1]
         kk_now = kk_rct.center
         kk_rct.move_ip(sum_mv)
-        if not check_bound(kk_rct):
+        if check_bound(kk_rct) != (True, True) :  #こうかとん画面外判定
             kk_rct.center = kk_now
         screen.blit(kk_img, kk_rct)
 
         # 爆弾移動
         bb_rct.move_ip(vx, vy)
-        if not check_bound(bb_rct):
-            if bb_rct.left <= 0 or bb_rct.right >= 1100:
+        if check_bound(bb_rct) != (True, True):  #爆弾画面外判定
+            if bb_rct.left < 0 or bb_rct.right > WIDTH:
                 vx *= -1
-            if bb_rct.top <= 0 or bb_rct.bottom >= 650:
+            if bb_rct.top < 0 or bb_rct.bottom > HEIGHT:
                 vy *= -1
         screen.blit(bb_img, bb_rct)
 
