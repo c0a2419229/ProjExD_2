@@ -5,7 +5,14 @@ import random
 
 
 WIDTH, HEIGHT = 1100, 650
+DELTA = {  #移動量辞書
+    pg.K_UP: (0, -5), 
+    pg.K_DOWN: (0, +5), 
+    pg.K_LEFT: (-5, 0), 
+    pg.K_RIGHT: (+5, 0),
+}
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
 
 
 def main():
@@ -25,9 +32,26 @@ def main():
     bb_img.set_colorkey((0, 0, 0))
     bb_rct = bb_img.get_rect()
     bb_rct.center = random.randint(0, 1100), random.randint(0, 650)
-    vx = 0
-    vy = 0
+    vx = +5
+    vy = +5
 
+    def check_bound(rct):
+        """
+        引数：こうかとんRect or 爆弾Rect
+        戻り値：横方向・縦方向の真理値タプル（True：画面内 / False：画面外）
+        Rectオブジェクトのleft, right, top, bottomの値から画面内・外を判断する
+        """
+        if rct.left <= 0:
+            return False
+        elif rct.right >= 1100:
+            return False
+        elif rct.top <= 0:
+            return False
+        elif rct.bottom >= 650:
+            return False
+        else:
+            return True
+            
 
     while True:
         for event in pg.event.get():
@@ -38,28 +62,31 @@ def main():
         # こうかとん移動
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
-        DELTA = {pg.K_UP: (0, -5), pg.K_DOWN: (0, +5), pg.K_LEFT: (-5, 0), pg.K_RIGHT: (+5, 0)}
-        if key_lst[pg.K_UP]:
-            sum_mv[1] += DELTA[pg.K_UP][1]
-        if key_lst[pg.K_DOWN]:
-            sum_mv[1] += DELTA[pg.K_DOWN][1]
-        if key_lst[pg.K_LEFT]:
-            sum_mv[0] += DELTA[pg.K_LEFT][0]
-        if key_lst[pg.K_RIGHT]:
-            sum_mv[0] += DELTA[pg.K_RIGHT][0]
+        for key, mv in DELTA.items():
+            if key_lst[key]:
+                sum_mv[0] += mv[0]
+                sum_mv[1] += mv[1]
+        kk_now = kk_rct.center
         kk_rct.move_ip(sum_mv)
+        if not check_bound(kk_rct):
+            kk_rct.center = kk_now
         screen.blit(kk_img, kk_rct)
 
         # 爆弾移動
-        vx = +5
-        vy = +5
         bb_rct.move_ip(vx, vy)
+        if not check_bound(bb_rct):
+            if bb_rct.left <= 0 or bb_rct.right >= 1100:
+                vx *= -1
+            if bb_rct.top <= 0 or bb_rct.bottom >= 650:
+                vy *= -1
         screen.blit(bb_img, bb_rct)
 
         # ディスプレイ更新
         pg.display.update()
         tmr += 1
         clock.tick(50)
+        
+
 
 
 if __name__ == "__main__":
