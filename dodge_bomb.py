@@ -12,6 +12,17 @@ DELTA = {  #移動量辞書
     pg.K_LEFT: (-5, 0), 
     pg.K_RIGHT: (+5, 0),
 }
+
+HOUKOU = {
+    (+5, 0): pg.transform.flip(pg.image.load("ex2/fig/3.png"), True, False),
+    (+5, +5): pg.transform.flip(pg.image.load("ex2/fig/3.png"), True, False), 
+    (+5, -5): pg.transform.flip(pg.image.load("ex2/fig/3.png"), True, False), 
+    (0, +5): pg.transform.rotozoom(pg.image.load("ex2/fig/3.png"), 90, 0.9), 
+    (0, -5): pg.transform.rotozoom(pg.image.load("ex2/fig/3.png"), 270, 0.9), 
+    (-5, 0): pg.transform.rotozoom(pg.image.load("ex2/fig/3.png"), 0, 0.9), 
+    (-5, +5): pg.transform.rotozoom(pg.image.load("ex2/fig/3.png"), 45, 0.9), 
+    (-5, -5): pg.transform.rotozoom(pg.image.load("ex2/fig/3.png"), 315, 0.9), 
+}
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -65,7 +76,24 @@ def main():
         txt = fonto.render("Game Over", True, (255, 255, 255))
         screen.blit(txt, [390, 290])
         pg.display.update()
-        time.sleep(5)     
+        time.sleep(5)  
+
+    # こうかとん方向転換   
+    def get_kk_img(sum_mv: tuple[int, int]) -> pg.Surface:
+        if sum_mv == (0, 0):
+            img = kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+            return img
+        else:
+            img = HOUKOU[sum_mv]
+            if sum_mv == ((0, +5) or (0, -5)):
+                img = pg.transform.flip(img, True, False)
+            elif sum_mv == ((+5, 0), (+5, +5)):
+                img = pg.transform.flip(img, False, True)
+                img = pg.transform.flip(img, False, True)
+            return img
+        
+                    
+
     
 
     #画面外判定関数
@@ -98,6 +126,8 @@ def main():
                 sum_mv[1] += mv[1]
         kk_now = kk_rct.center
         kk_rct.move_ip(sum_mv)
+        kk_img = get_kk_img((0, 0))
+        kk_img = get_kk_img(tuple(sum_mv))
         if check_bound(kk_rct) != (True, True) :  #こうかとん画面外判定
             kk_rct.center = kk_now
         screen.blit(kk_img, kk_rct)
@@ -108,9 +138,6 @@ def main():
         avy = bb_accs[min(tmr//500, 9)]
         bb_img = bb_imgs[min(tmr//500, 9)]
         yoko, tate = check_bound(bb_rct)  #爆弾画面外判定
-        print(yoko, tate)
-        
-        print(avx, avy)
         if not yoko:
             vx *= -1
         if not tate:
